@@ -100,11 +100,13 @@ export function UsersPage() {
         <Card>
           <CardContent className="p-6">
             <DataTable
-              columns={columns}
-              data={users}
-              searchKey="name"
-              searchPlaceholder="Search users..."
-            />
+  columns={columns}
+  data={users}
+  searchKey="name"
+  searchPlaceholder="Search users..."
+  emptyTitle="No users found"
+  emptyDescription="No users match your current search."
+/>
           </CardContent>
         </Card>
       </div>

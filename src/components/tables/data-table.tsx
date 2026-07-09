@@ -6,6 +6,7 @@ import {
   type ColumnDef,
 } from "@tanstack/react-table"
 
+import { EmptyState } from "../shared/empty-state"
 import { Input } from "../ui/input"
 import {
   Table,
@@ -21,6 +22,8 @@ type DataTableProps<TData, TValue> = {
   data: TData[]
   searchKey?: string
   searchPlaceholder?: string
+  emptyTitle?: string
+  emptyDescription?: string
 }
 
 export function DataTable<TData, TValue>({
@@ -28,6 +31,8 @@ export function DataTable<TData, TValue>({
   data,
   searchKey,
   searchPlaceholder = "Search...",
+  emptyTitle = "No results found",
+  emptyDescription = "Try adjusting your search or filters.",
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -84,11 +89,11 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  No results found.
+                <TableCell colSpan={columns.length}>
+                  <EmptyState
+                    title={emptyTitle}
+                    description={emptyDescription}
+                  />
                 </TableCell>
               </TableRow>
             )}
