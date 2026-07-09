@@ -4,6 +4,7 @@ import { SignInPage } from "../features/auth/sign-in-page"
 import { DashboardPage } from "../features/dashboard/dashboard-page"
 import { LandingPage } from "../features/landing/landing-page"
 import { NotFoundPage } from "../features/not-found/not-found-page"
+import { SettingsPage } from "../features/settings/settings-page"
 import { UsersPage } from "../features/users/users-page"
 
 export const router = createBrowserRouter([
@@ -22,6 +23,10 @@ export const router = createBrowserRouter([
   {
     path: "/users",
     element: <UsersPage />,
+  },
+  {
+    path: "/settings",
+    element: <SettingsPage />,
   },
   {
     path: "*",
