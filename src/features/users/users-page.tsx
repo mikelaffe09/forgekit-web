@@ -2,15 +2,11 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { MoreHorizontal, Plus } from "lucide-react"
 
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
+import { PageHeader } from "../../components/shared/page-header"
 import { DataTable } from "../../components/tables/data-table"
 import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card"
+import { Card, CardContent } from "../../components/ui/card"
 
 type User = {
   id: number
@@ -89,25 +85,29 @@ export function UsersPage() {
       title="Users"
       description="Reusable table page pattern for business apps."
     >
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Users</CardTitle>
+      <div className="space-y-6">
+        <PageHeader
+          title="Users"
+          description="Reusable resource table pattern with search, actions, and status badges."
+          action={
+            <Button>
+              <Plus className="mr-2 size-4" />
+              Add user
+            </Button>
+          }
+        />
 
-          <Button>
-            <Plus className="mr-2 size-4" />
-            Add user
-          </Button>
-        </CardHeader>
-
-        <CardContent>
-          <DataTable
-            columns={columns}
-            data={users}
-            searchKey="name"
-            searchPlaceholder="Search users..."
-          />
-        </CardContent>
-      </Card>
+        <Card>
+          <CardContent className="p-6">
+            <DataTable
+              columns={columns}
+              data={users}
+              searchKey="name"
+              searchPlaceholder="Search users..."
+            />
+          </CardContent>
+        </Card>
+      </div>
     </DashboardLayout>
   )
 }

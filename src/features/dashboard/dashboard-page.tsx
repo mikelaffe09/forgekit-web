@@ -1,6 +1,7 @@
 import { Activity, DollarSign, Package, Users } from "lucide-react"
 
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
+import { PageHeader } from "../../components/shared/page-header"
 import { StatCard } from "../../components/shared/stat-card"
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
 
@@ -37,42 +38,49 @@ export function DashboardPage() {
       title="Dashboard"
       description="Reusable dashboard overview for future apps."
     >
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => (
-          <StatCard
-            key={stat.title}
-            title={stat.title}
-            value={stat.value}
-            description={stat.description}
-            icon={stat.icon}
-          />
-        ))}
-      </div>
+      <div className="space-y-6">
+        <PageHeader
+          title="Dashboard overview"
+          description="Reusable stats, cards, and activity sections for future business apps."
+        />
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent activity</CardTitle>
-          </CardHeader>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {stats.map((stat) => (
+            <StatCard
+              key={stat.title}
+              title={stat.title}
+              value={stat.value}
+              description={stat.description}
+              icon={stat.icon}
+            />
+          ))}
+        </div>
 
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <p>New user created</p>
-            <p>Product updated</p>
-            <p>Report exported</p>
-            <p>Settings changed</p>
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent activity</CardTitle>
+            </CardHeader>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Starter notes</CardTitle>
-          </CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+              <p>New user created</p>
+              <p>Product updated</p>
+              <p>Report exported</p>
+              <p>Settings changed</p>
+            </CardContent>
+          </Card>
 
-          <CardContent className="text-sm text-muted-foreground">
-            Use this layout for SaaS dashboards, admin panels, CRMs, inventory
-            systems, booking platforms, and client portals.
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Starter notes</CardTitle>
+            </CardHeader>
+
+            <CardContent className="text-sm text-muted-foreground">
+              Use this layout for SaaS dashboards, admin panels, CRMs, inventory
+              systems, booking platforms, and client portals.
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   )
