@@ -7,6 +7,7 @@ import { DataTable } from "../../components/tables/data-table"
 import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
+import { DeleteDialog } from "../../components/shared/delete-dialog"
 
 type User = {
   id: number
@@ -69,14 +70,27 @@ const columns: ColumnDef<User>[] = [
       )
     },
   },
-  {
-    id: "actions",
-    cell: () => (
-      <Button variant="ghost" size="icon">
-        <MoreHorizontal className="size-4" />
-      </Button>
-    ),
+{
+  id: "actions",
+  cell: ({ row }) => {
+    const user = row.original
+
+    return (
+      <DeleteDialog
+        title="Delete user?"
+        description={`This will permanently delete ${user.name}. This action cannot be undone.`}
+        onConfirm={() => {
+          console.log("Delete user:", user.id)
+        }}
+        trigger={
+          <Button variant="ghost" size="icon">
+            <MoreHorizontal className="size-4" />
+          </Button>
+        }
+      />
+    )
   },
+},
 ]
 
 export function UsersPage() {
