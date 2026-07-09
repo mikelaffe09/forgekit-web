@@ -2,12 +2,11 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { MoreHorizontal, Plus } from "lucide-react"
 
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
-import { PageHeader } from "../../components/shared/page-header"
+import { DeleteDialog } from "../../components/shared/delete-dialog"
 import { DataTable } from "../../components/tables/data-table"
 import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
-import { Card, CardContent } from "../../components/ui/card"
-import { DeleteDialog } from "../../components/shared/delete-dialog"
+import { ResourcePage } from "../../templates/resource-page"
 
 type User = {
   id: number
@@ -70,27 +69,27 @@ const columns: ColumnDef<User>[] = [
       )
     },
   },
-{
-  id: "actions",
-  cell: ({ row }) => {
-    const user = row.original
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const user = row.original
 
-    return (
-      <DeleteDialog
-        title="Delete user?"
-        description={`This will permanently delete ${user.name}. This action cannot be undone.`}
-        onConfirm={() => {
-          console.log("Delete user:", user.id)
-        }}
-        trigger={
-          <Button variant="ghost" size="icon">
-            <MoreHorizontal className="size-4" />
-          </Button>
-        }
-      />
-    )
+      return (
+        <DeleteDialog
+          title="Delete user?"
+          description={`This will permanently delete ${user.name}. This action cannot be undone.`}
+          onConfirm={() => {
+            console.log("Delete user:", user.id)
+          }}
+          trigger={
+            <Button variant="ghost" size="icon">
+              <MoreHorizontal className="size-4" />
+            </Button>
+          }
+        />
+      )
+    },
   },
-},
 ]
 
 export function UsersPage() {
@@ -99,31 +98,25 @@ export function UsersPage() {
       title="Users"
       description="Reusable table page pattern for business apps."
     >
-      <div className="space-y-6">
-        <PageHeader
-          title="Users"
-          description="Reusable resource table pattern with search, actions, and status badges."
-          action={
-            <Button>
-              <Plus className="mr-2 size-4" />
-              Add user
-            </Button>
-          }
+      <ResourcePage
+        title="Users"
+        description="Reusable resource table pattern with search, actions, and status badges."
+        action={
+          <Button>
+            <Plus className="mr-2 size-4" />
+            Add user
+          </Button>
+        }
+      >
+        <DataTable
+          columns={columns}
+          data={users}
+          searchKey="name"
+          searchPlaceholder="Search users..."
+          emptyTitle="No users found"
+          emptyDescription="No users match your current search."
         />
-
-        <Card>
-          <CardContent className="p-6">
-            <DataTable
-  columns={columns}
-  data={users}
-  searchKey="name"
-  searchPlaceholder="Search users..."
-  emptyTitle="No users found"
-  emptyDescription="No users match your current search."
-/>
-          </CardContent>
-        </Card>
-      </div>
+      </ResourcePage>
     </DashboardLayout>
   )
 }
