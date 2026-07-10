@@ -8,8 +8,9 @@ import {
   useReactTable,
   type ColumnDef,
   type SortingState,
+  type VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ArrowUpDown, Download } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, Columns3, Download } from "lucide-react"
 
 import { EmptyState } from "../shared/empty-state"
 import { Button } from "../ui/button"
@@ -34,6 +35,7 @@ type DataTableProps<TData, TValue> = {
   isLoading?: boolean
   enableExport?: boolean
   exportFileName?: string
+  enableColumnVisibility?: boolean
 }
 
 function formatCsvValue(value: unknown) {
@@ -74,6 +76,13 @@ function downloadCsv(rows: Record<string, unknown>[], fileName: string) {
   URL.revokeObjectURL(url)
 }
 
+function formatColumnLabel(columnId: string) {
+  return columnId
+    .replace(/([A-Z])/g, " $1")
+    .replace(/[-_]/g, " ")
+    .replace(/^./, (char) => char.toUpperCase())
+}
+
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -84,14 +93,17 @@ export function DataTable<TData, TValue>({
   isLoading = false,
   enableExport = false,
   exportFileName = "table-export.csv",
+  enableColumnVisibility = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
   const table = useReactTable({
     data,
     columns,
     state: {
       sorting,
+      columnVisibility,
     },
     initialState: {
       pagination: {
@@ -99,6 +111,7 @@ export function DataTable<TData, TValue>({
       },
     },
     onSortingChange: setSorting,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -114,6 +127,10 @@ export function DataTable<TData, TValue>({
 
     downloadCsv(filteredRows, exportFileName)
   }
+
+  const hideableColumns = table
+    .getAllColumns()
+    .filter((column) => column.getCanHide())
 
   return (
     <div className="space-y-4">
@@ -132,16 +149,50 @@ export function DataTable<TData, TValue>({
           <div />
         )}
 
-        {enableExport ? (
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            disabled={isLoading || table.getFilteredRowModel().rows.length === 0}
-          >
-            <Download className="mr-2 size-4" />
-            Export CSV
-          </Button>
-        ) : null}
+        <div className="flex flex-wrap gap-2">
+          {enableColumnVisibility ? (
+            <details className="relative">
+              <summary className="inline-flex h-9 cursor-pointer list-none items-center justify-center rounded-md border bg-background px-4 text-sm font-medium shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground">
+                <Columns3 className="mr-2 size-4" />
+                Columns
+              </summary>
+
+              <div className="absolute right-0 z-20 mt-2 w-48 rounded-md border bg-popover p-2 text-popover-foreground shadow-md">
+                <div className="space-y-1">
+                  {hideableColumns.map((column) => (
+                    <label
+                      key={column.id}
+                      className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={column.getIsVisible()}
+                        onChange={(event) =>
+                          column.toggleVisibility(event.target.checked)
+                        }
+                        disabled={isLoading}
+                        className="size-4"
+                      />
+
+                      <span>{formatColumnLabel(column.id)}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </details>
+          ) : null}
+
+          {enableExport ? (
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              disabled={isLoading || table.getFilteredRowModel().rows.length === 0}
+            >
+              <Download className="mr-2 size-4" />
+              Export CSV
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       <div className="rounded-md border">
@@ -215,7 +266,7 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length}>
+                <TableCell colSpan={visibleColumnCount || columns.length}>
                   <EmptyState
                     title={emptyTitle}
                     description={emptyDescription}

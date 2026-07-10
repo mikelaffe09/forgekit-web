@@ -117,6 +117,7 @@ export function UsersPage() {
   emptyDescription="No users match your current search."
   enableExport
   exportFileName="users"
+  enableColumnVisibility
 />
       </ResourcePage>
     </DashboardLayout>

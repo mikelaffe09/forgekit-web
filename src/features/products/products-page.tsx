@@ -130,6 +130,7 @@ export function ProductsPage() {
   emptyDescription="No products match your current search."
   enableExport
   exportFileName="products"
+  enableColumnVisibility
 />
       </ResourcePage>
 
