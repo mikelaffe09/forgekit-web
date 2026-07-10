@@ -12,6 +12,7 @@ import {
 } from "@tanstack/react-table"
 import { ArrowDown, ArrowUp, ArrowUpDown, Columns3, Download } from "lucide-react"
 
+import { useLocalStorageState } from "../../hooks/use-local-storage-state"
 import { EmptyState } from "../shared/empty-state"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
@@ -36,6 +37,12 @@ type DataTableProps<TData, TValue> = {
   enableExport?: boolean
   exportFileName?: string
   enableColumnVisibility?: boolean
+  storageKey?: string
+}
+
+type DataTablePreferences = {
+  columnVisibility: VisibilityState
+  pageSize: number
 }
 
 function formatCsvValue(value: unknown) {
@@ -83,6 +90,11 @@ function formatColumnLabel(columnId: string) {
     .replace(/^./, (char) => char.toUpperCase())
 }
 
+const defaultPreferences: DataTablePreferences = {
+  columnVisibility: {},
+  pageSize: 5,
+}
+
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -94,24 +106,42 @@ export function DataTable<TData, TValue>({
   enableExport = false,
   exportFileName = "table-export.csv",
   enableColumnVisibility = false,
+  storageKey,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+
+  const [preferences, setPreferences] =
+    useLocalStorageState<DataTablePreferences>(
+      storageKey ? `forgekit-table-${storageKey}` : "forgekit-table-default",
+      defaultPreferences,
+    )
 
   const table = useReactTable({
     data,
     columns,
     state: {
       sorting,
-      columnVisibility,
+      columnVisibility: storageKey
+        ? preferences.columnVisibility
+        : defaultPreferences.columnVisibility,
     },
     initialState: {
       pagination: {
-        pageSize: 5,
+        pageSize: storageKey ? preferences.pageSize : defaultPreferences.pageSize,
       },
     },
     onSortingChange: setSorting,
-    onColumnVisibilityChange: setColumnVisibility,
+    onColumnVisibilityChange: (updater) => {
+      const nextColumnVisibility =
+        typeof updater === "function"
+          ? updater(preferences.columnVisibility)
+          : updater
+
+      setPreferences((currentPreferences) => ({
+        ...currentPreferences,
+        columnVisibility: nextColumnVisibility,
+      }))
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -119,6 +149,15 @@ export function DataTable<TData, TValue>({
   })
 
   const visibleColumnCount = table.getVisibleFlatColumns().length
+
+  function handlePageSizeChange(pageSize: number) {
+    table.setPageSize(pageSize)
+
+    setPreferences((currentPreferences) => ({
+      ...currentPreferences,
+      pageSize,
+    }))
+  }
 
   function handleExport() {
     const filteredRows = table
@@ -288,7 +327,7 @@ export function DataTable<TData, TValue>({
           <select
             value={table.getState().pagination.pageSize}
             onChange={(event) => {
-              table.setPageSize(Number(event.target.value))
+              handlePageSizeChange(Number(event.target.value))
             }}
             disabled={isLoading}
             className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-xs disabled:cursor-not-allowed disabled:opacity-50"

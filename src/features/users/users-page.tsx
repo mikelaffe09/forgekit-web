@@ -118,6 +118,7 @@ export function UsersPage() {
   enableExport
   exportFileName="users"
   enableColumnVisibility
+  storageKey="users"
 />
       </ResourcePage>
     </DashboardLayout>

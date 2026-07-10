@@ -135,6 +135,7 @@ export function ProductsPage() {
   enableExport
   exportFileName="products"
   enableColumnVisibility
+  storageKey="products"
 />
       </ResourcePage>
 
