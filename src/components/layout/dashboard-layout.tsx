@@ -1,4 +1,4 @@
-import { BarChart3, Home, Settings, Users } from "lucide-react"
+import { BarChart3, Home, Package, Settings, Users } from "lucide-react"
 import type { ReactNode } from "react"
 import { Link, useLocation } from "react-router"
 
@@ -20,6 +20,11 @@ const navItems = [
     label: "Users",
     href: "/users",
     icon: Users,
+  },
+  {
+    label: "Products",
+    href: "/products",
+    icon: Package,
   },
   {
     label: "Reports",
