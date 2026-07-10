@@ -19,6 +19,7 @@ import { ProductForm } from "./product-form"
 import type { ProductFormValues } from "./product-form"
 import { getProducts } from "./product-service"
 import type { Product } from "./product-types"
+import { useLocalStorageState } from "../../hooks/use-local-storage-state"
 
 function getTodayDate() {
   return new Date().toISOString().split("T")[0]
@@ -35,7 +36,10 @@ function getNextProductId(products: Product[]) {
 export function ProductsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
-  const [products, setProducts] = useState<Product[]>(() => getProducts())
+  const [products, setProducts] = useLocalStorageState<Product[]>(
+  "forgekit-products",
+  getProducts(),
+)
 
   function handleCreateProduct(values: ProductFormValues) {
     const newProduct: Product = {
