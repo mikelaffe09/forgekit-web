@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
@@ -14,7 +14,7 @@ import {
 } from "../../components/ui/dialog"
 import { ResourcePage } from "../../templates/resource-page"
 
-import { productColumns } from "./product-columns"
+import { getProductColumns } from "./product-columns"
 import { ProductForm } from "./product-form"
 import type { ProductFormValues } from "./product-form"
 import { getProducts } from "./product-service"
@@ -57,6 +57,24 @@ export function ProductsPage() {
     setIsCreateDialogOpen(false)
   }
 
+  function handleDeleteProduct(product: Product) {
+    setProducts((currentProducts) =>
+      currentProducts.filter((currentProduct) => currentProduct.id !== product.id),
+    )
+
+    toast.success("Product deleted", {
+      description: `${product.name} was removed from the products table.`,
+    })
+  }
+
+  const columns = useMemo(
+    () =>
+      getProductColumns({
+        onDelete: handleDeleteProduct,
+      }),
+    [],
+  )
+
   return (
     <DashboardLayout
       title="Products"
@@ -73,7 +91,7 @@ export function ProductsPage() {
         }
       >
         <DataTable
-          columns={productColumns}
+          columns={columns}
           data={products}
           searchKey="name"
           searchPlaceholder="Search products..."
