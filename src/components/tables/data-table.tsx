@@ -1,10 +1,14 @@
+import { useState } from "react"
 import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getSortedRowModel,
   useReactTable,
   type ColumnDef,
+  type SortingState,
 } from "@tanstack/react-table"
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
 
 import { EmptyState } from "../shared/empty-state"
 import { Input } from "../ui/input"
@@ -34,11 +38,18 @@ export function DataTable<TData, TValue>({
   emptyTitle = "No results found",
   emptyDescription = "Try adjusting your search or filters.",
 }: DataTableProps<TData, TValue>) {
+  const [sorting, setSorting] = useState<SortingState>([])
+
   const table = useReactTable({
     data,
     columns,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   })
 
   return (
@@ -59,16 +70,39 @@ export function DataTable<TData, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
+                {headerGroup.headers.map((header) => {
+                  const sortDirection = header.column.getIsSorted()
+
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-2 font-medium"
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+
+                          {sortDirection === "asc" ? (
+                            <ArrowUp className="size-3.5" />
+                          ) : sortDirection === "desc" ? (
+                            <ArrowDown className="size-3.5" />
+                          ) : (
+                            <ArrowUpDown className="size-3.5 text-muted-foreground" />
+                          )}
+                        </button>
+                      ) : (
+                        flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
+                        )
+                      )}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
             ))}
           </TableHeader>
