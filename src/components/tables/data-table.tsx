@@ -14,6 +14,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
 import { EmptyState } from "../shared/empty-state"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
+import { Skeleton } from "../ui/skeleton"
 import {
   Table,
   TableBody,
@@ -30,6 +31,7 @@ type DataTableProps<TData, TValue> = {
   searchPlaceholder?: string
   emptyTitle?: string
   emptyDescription?: string
+  isLoading?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -39,6 +41,7 @@ export function DataTable<TData, TValue>({
   searchPlaceholder = "Search...",
   emptyTitle = "No results found",
   emptyDescription = "Try adjusting your search or filters.",
+  isLoading = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
 
@@ -60,6 +63,8 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
   })
 
+  const visibleColumnCount = table.getVisibleFlatColumns().length
+
   return (
     <div className="space-y-4">
       {searchKey ? (
@@ -70,6 +75,7 @@ export function DataTable<TData, TValue>({
             table.getColumn(searchKey)?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
+          disabled={isLoading}
         />
       ) : null}
 
@@ -86,8 +92,9 @@ export function DataTable<TData, TValue>({
                       {header.isPlaceholder ? null : header.column.getCanSort() ? (
                         <button
                           type="button"
-                          className="inline-flex items-center gap-2 font-medium"
+                          className="inline-flex items-center gap-2 font-medium disabled:cursor-not-allowed disabled:opacity-50"
                           onClick={header.column.getToggleSortingHandler()}
+                          disabled={isLoading}
                         >
                           {flexRender(
                             header.column.columnDef.header,
@@ -116,7 +123,17 @@ export function DataTable<TData, TValue>({
           </TableHeader>
 
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  {Array.from({ length: visibleColumnCount }).map((__, cellIndex) => (
+                    <TableCell key={cellIndex}>
+                      <Skeleton className="h-5 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
@@ -155,7 +172,8 @@ export function DataTable<TData, TValue>({
             onChange={(event) => {
               table.setPageSize(Number(event.target.value))
             }}
-            className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-xs"
+            disabled={isLoading}
+            className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-xs disabled:cursor-not-allowed disabled:opacity-50"
           >
             {[5, 10, 20, 50].map((pageSize) => (
               <option key={pageSize} value={pageSize}>
@@ -173,7 +191,7 @@ export function DataTable<TData, TValue>({
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            disabled={isLoading || !table.getCanPreviousPage()}
           >
             Previous
           </Button>
@@ -182,7 +200,7 @@ export function DataTable<TData, TValue>({
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            disabled={isLoading || !table.getCanNextPage()}
           >
             Next
           </Button>
