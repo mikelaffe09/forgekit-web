@@ -18,17 +18,40 @@ import { productColumns } from "./product-columns"
 import { ProductForm } from "./product-form"
 import type { ProductFormValues } from "./product-form"
 import { getProducts } from "./product-service"
+import type { Product } from "./product-types"
+
+function getTodayDate() {
+  return new Date().toISOString().split("T")[0]
+}
+
+function getNextProductId(products: Product[]) {
+  if (products.length === 0) {
+    return 1
+  }
+
+  return Math.max(...products.map((product) => product.id)) + 1
+}
 
 export function ProductsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-
-  const products = getProducts()
+  const [products, setProducts] = useState<Product[]>(() => getProducts())
 
   function handleCreateProduct(values: ProductFormValues) {
-    console.log("Create product:", values)
+    const newProduct: Product = {
+      id: getNextProductId(products),
+      name: values.name,
+      sku: values.sku,
+      category: values.category,
+      price: values.price,
+      stock: values.stock,
+      status: values.status,
+      updatedAt: getTodayDate(),
+    }
 
-    toast.success("Product submitted", {
-      description: `${values.name} was submitted successfully.`,
+    setProducts((currentProducts) => [newProduct, ...currentProducts])
+
+    toast.success("Product created", {
+      description: `${values.name} was added to the products table.`,
     })
 
     setIsCreateDialogOpen(false)
