@@ -3,6 +3,7 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
@@ -11,6 +12,7 @@ import {
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
 
 import { EmptyState } from "../shared/empty-state"
+import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import {
   Table,
@@ -46,10 +48,16 @@ export function DataTable<TData, TValue>({
     state: {
       sorting,
     },
+    initialState: {
+      pagination: {
+        pageSize: 5,
+      },
+    },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   })
 
   return (
@@ -133,6 +141,52 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          Showing {table.getRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} result(s)
+        </p>
+
+        <div className="flex items-center gap-2">
+          <select
+            value={table.getState().pagination.pageSize}
+            onChange={(event) => {
+              table.setPageSize(Number(event.target.value))
+            }}
+            className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-xs"
+          >
+            {[5, 10, 20, 50].map((pageSize) => (
+              <option key={pageSize} value={pageSize}>
+                {pageSize} / page
+              </option>
+            ))}
+          </select>
+
+          <span className="text-sm text-muted-foreground">
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount() || 1}
+          </span>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   )
