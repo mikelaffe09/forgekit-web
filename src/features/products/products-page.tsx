@@ -28,6 +28,7 @@ import { ProductForm } from "./product-form"
 import type { ProductFormValues } from "./product-form"
 import { getProducts } from "./product-service"
 import type { Product } from "./product-types"
+import { ConfirmDialog } from "../../components/shared/confirm-dialog"
 
 function getTodayDate() {
   return new Date().toISOString().split("T")[0]
@@ -192,10 +193,18 @@ export function ProductsPage() {
           description="Manage products, SKUs, categories, prices, stock levels, and statuses."
           action={
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" onClick={handleResetProducts}>
-                <RotateCcw className="mr-2 size-4" />
-                Reset demo data
-              </Button>
+              <ConfirmDialog
+  title="Reset demo data?"
+  description="This will replace the current products table with the original demo products. Your local product changes will be removed."
+  confirmLabel="Reset data"
+  onConfirm={handleResetProducts}
+  trigger={
+    <Button variant="outline">
+      <RotateCcw className="mr-2 size-4" />
+      Reset demo data
+    </Button>
+  }
+/>
 
               <Button onClick={() => setIsCreateDialogOpen(true)}>
                 <Plus className="mr-2 size-4" />
