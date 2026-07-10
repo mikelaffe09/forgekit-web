@@ -9,7 +9,7 @@ import {
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, Download } from "lucide-react"
 
 import { EmptyState } from "../shared/empty-state"
 import { Button } from "../ui/button"
@@ -32,6 +32,46 @@ type DataTableProps<TData, TValue> = {
   emptyTitle?: string
   emptyDescription?: string
   isLoading?: boolean
+  enableExport?: boolean
+  exportFileName?: string
+}
+
+function formatCsvValue(value: unknown) {
+  if (value === null || value === undefined) {
+    return ""
+  }
+
+  const stringValue = String(value).replace(/"/g, '""')
+
+  return `"${stringValue}"`
+}
+
+function downloadCsv(rows: Record<string, unknown>[], fileName: string) {
+  if (rows.length === 0) {
+    return
+  }
+
+  const headers = Object.keys(rows[0])
+  const csvRows = [
+    headers.map(formatCsvValue).join(","),
+    ...rows.map((row) =>
+      headers.map((header) => formatCsvValue(row[header])).join(","),
+    ),
+  ]
+
+  const csvContent = csvRows.join("\n")
+  const blob = new Blob([csvContent], {
+    type: "text/csv;charset=utf-8;",
+  })
+
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+
+  link.href = url
+  link.download = fileName.endsWith(".csv") ? fileName : `${fileName}.csv`
+  link.click()
+
+  URL.revokeObjectURL(url)
 }
 
 export function DataTable<TData, TValue>({
@@ -42,6 +82,8 @@ export function DataTable<TData, TValue>({
   emptyTitle = "No results found",
   emptyDescription = "Try adjusting your search or filters.",
   isLoading = false,
+  enableExport = false,
+  exportFileName = "table-export.csv",
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
 
@@ -65,19 +107,42 @@ export function DataTable<TData, TValue>({
 
   const visibleColumnCount = table.getVisibleFlatColumns().length
 
+  function handleExport() {
+    const filteredRows = table
+      .getFilteredRowModel()
+      .rows.map((row) => row.original as Record<string, unknown>)
+
+    downloadCsv(filteredRows, exportFileName)
+  }
+
   return (
     <div className="space-y-4">
-      {searchKey ? (
-        <Input
-          placeholder={searchPlaceholder}
-          value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn(searchKey)?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-          disabled={isLoading}
-        />
-      ) : null}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {searchKey ? (
+          <Input
+            placeholder={searchPlaceholder}
+            value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn(searchKey)?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+            disabled={isLoading}
+          />
+        ) : (
+          <div />
+        )}
+
+        {enableExport ? (
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            disabled={isLoading || table.getFilteredRowModel().rows.length === 0}
+          >
+            <Download className="mr-2 size-4" />
+            Export CSV
+          </Button>
+        ) : null}
+      </div>
 
       <div className="rounded-md border">
         <Table>
@@ -126,11 +191,13 @@ export function DataTable<TData, TValue>({
             {isLoading ? (
               Array.from({ length: 5 }).map((_, rowIndex) => (
                 <TableRow key={rowIndex}>
-                  {Array.from({ length: visibleColumnCount }).map((__, cellIndex) => (
-                    <TableCell key={cellIndex}>
-                      <Skeleton className="h-5 w-full" />
-                    </TableCell>
-                  ))}
+                  {Array.from({ length: visibleColumnCount }).map(
+                    (__, cellIndex) => (
+                      <TableCell key={cellIndex}>
+                        <Skeleton className="h-5 w-full" />
+                      </TableCell>
+                    ),
+                  )}
                 </TableRow>
               ))
             ) : table.getRowModel().rows.length ? (

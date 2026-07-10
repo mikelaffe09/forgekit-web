@@ -109,13 +109,15 @@ export function UsersPage() {
         }
       >
         <DataTable
-          columns={columns}
-          data={users}
-          searchKey="name"
-          searchPlaceholder="Search users..."
-          emptyTitle="No users found"
-          emptyDescription="No users match your current search."
-        />
+  columns={columns}
+  data={users}
+  searchKey="name"
+  searchPlaceholder="Search users..."
+  emptyTitle="No users found"
+  emptyDescription="No users match your current search."
+  enableExport
+  exportFileName="users"
+/>
       </ResourcePage>
     </DashboardLayout>
   )

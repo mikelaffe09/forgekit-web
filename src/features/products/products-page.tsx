@@ -122,13 +122,15 @@ export function ProductsPage() {
         }
       >
         <DataTable
-          columns={columns}
-          data={products}
-          searchKey="name"
-          searchPlaceholder="Search products..."
-          emptyTitle="No products found"
-          emptyDescription="No products match your current search."
-        />
+  columns={columns}
+  data={products}
+  searchKey="name"
+  searchPlaceholder="Search products..."
+  emptyTitle="No products found"
+  emptyDescription="No products match your current search."
+  enableExport
+  exportFileName="products"
+/>
       </ResourcePage>
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
