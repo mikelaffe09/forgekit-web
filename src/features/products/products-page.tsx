@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
@@ -34,6 +34,7 @@ function getNextProductId(products: Product[]) {
 
 export function ProductsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [products, setProducts] = useState<Product[]>(() => getProducts())
 
   function handleCreateProduct(values: ProductFormValues) {
@@ -57,6 +58,39 @@ export function ProductsPage() {
     setIsCreateDialogOpen(false)
   }
 
+  function handleEditProduct(product: Product) {
+    setEditingProduct(product)
+  }
+
+  function handleUpdateProduct(values: ProductFormValues) {
+    if (!editingProduct) {
+      return
+    }
+
+    const updatedProduct: Product = {
+      ...editingProduct,
+      name: values.name,
+      sku: values.sku,
+      category: values.category,
+      price: values.price,
+      stock: values.stock,
+      status: values.status,
+      updatedAt: getTodayDate(),
+    }
+
+    setProducts((currentProducts) =>
+      currentProducts.map((product) =>
+        product.id === editingProduct.id ? updatedProduct : product,
+      ),
+    )
+
+    toast.success("Product updated", {
+      description: `${values.name} was updated successfully.`,
+    })
+
+    setEditingProduct(null)
+  }
+
   function handleDeleteProduct(product: Product) {
     setProducts((currentProducts) =>
       currentProducts.filter((currentProduct) => currentProduct.id !== product.id),
@@ -67,13 +101,10 @@ export function ProductsPage() {
     })
   }
 
-  const columns = useMemo(
-    () =>
-      getProductColumns({
-        onDelete: handleDeleteProduct,
-      }),
-    [],
-  )
+  const columns = getProductColumns({
+    onEdit: handleEditProduct,
+    onDelete: handleDeleteProduct,
+  })
 
   return (
     <DashboardLayout
@@ -114,6 +145,33 @@ export function ProductsPage() {
             submitLabel="Create product"
             onSubmit={handleCreateProduct}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(editingProduct)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingProduct(null)
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit product</DialogTitle>
+            <DialogDescription>
+              Reusable edit-product form pattern with pre-filled values.
+            </DialogDescription>
+          </DialogHeader>
+
+          {editingProduct ? (
+            <ProductForm
+              key={editingProduct.id}
+              defaultValues={editingProduct}
+              submitLabel="Update product"
+              onSubmit={handleUpdateProduct}
+            />
+          ) : null}
         </DialogContent>
       </Dialog>
     </DashboardLayout>

@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal } from "lucide-react"
+import { Pencil, Trash2 } from "lucide-react"
 
 import { DeleteDialog } from "../../components/shared/delete-dialog"
 import { Badge } from "../../components/ui/badge"
@@ -8,6 +8,7 @@ import { Button } from "../../components/ui/button"
 import type { Product } from "./product-types"
 
 type ProductColumnsOptions = {
+  onEdit: (product: Product) => void
   onDelete: (product: Product) => void
 }
 
@@ -31,6 +32,7 @@ function getStatusVariant(status: Product["status"]) {
 }
 
 export function getProductColumns({
+  onEdit,
   onDelete,
 }: ProductColumnsOptions): ColumnDef<Product>[] {
   return [
@@ -93,16 +95,26 @@ export function getProductColumns({
         const product = row.original
 
         return (
-          <DeleteDialog
-            title="Delete product?"
-            description={`This will permanently delete ${product.name}. This action cannot be undone.`}
-            onConfirm={() => onDelete(product)}
-            trigger={
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="size-4" />
-              </Button>
-            }
-          />
+          <div className="flex items-center justify-end gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onEdit(product)}
+            >
+              <Pencil className="size-4" />
+            </Button>
+
+            <DeleteDialog
+              title="Delete product?"
+              description={`This will permanently delete ${product.name}. This action cannot be undone.`}
+              onConfirm={() => onDelete(product)}
+              trigger={
+                <Button variant="ghost" size="icon">
+                  <Trash2 className="size-4" />
+                </Button>
+              }
+            />
+          </div>
         )
       },
     },
