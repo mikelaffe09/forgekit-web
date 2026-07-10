@@ -1,4 +1,11 @@
-import { AlertTriangle, CircleCheck, DollarSign, Package, Plus } from "lucide-react"
+import {
+  AlertTriangle,
+  CircleCheck,
+  DollarSign,
+  Package,
+  Plus,
+  RotateCcw,
+} from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -121,11 +128,21 @@ export function ProductsPage() {
 
   function handleDeleteProduct(product: Product) {
     setProducts((currentProducts) =>
-      currentProducts.filter((currentProduct) => currentProduct.id !== product.id),
+      currentProducts.filter(
+        (currentProduct) => currentProduct.id !== product.id,
+      ),
     )
 
     toast.success("Product deleted", {
       description: `${product.name} was removed from the products table.`,
+    })
+  }
+
+  function handleResetProducts() {
+    setProducts(getProducts())
+
+    toast.success("Demo products reset", {
+      description: "The products table was restored to the original demo data.",
     })
   }
 
@@ -174,10 +191,17 @@ export function ProductsPage() {
           title="Products"
           description="Manage products, SKUs, categories, prices, stock levels, and statuses."
           action={
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
-              <Plus className="mr-2 size-4" />
-              Add product
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={handleResetProducts}>
+                <RotateCcw className="mr-2 size-4" />
+                Reset demo data
+              </Button>
+
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="mr-2 size-4" />
+                Add product
+              </Button>
+            </div>
           }
         >
           <DataTable
