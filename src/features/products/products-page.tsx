@@ -1,8 +1,9 @@
-import { Plus } from "lucide-react"
+import { AlertTriangle, CircleCheck, DollarSign, Package, Plus } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
+import { StatCard } from "../../components/shared/stat-card"
 import { DataTable } from "../../components/tables/data-table"
 import { Button } from "../../components/ui/button"
 import {
@@ -12,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../components/ui/dialog"
+import { useLocalStorageState } from "../../hooks/use-local-storage-state"
 import { ResourcePage } from "../../templates/resource-page"
 
 import { getProductColumns } from "./product-columns"
@@ -19,7 +21,6 @@ import { ProductForm } from "./product-form"
 import type { ProductFormValues } from "./product-form"
 import { getProducts } from "./product-service"
 import type { Product } from "./product-types"
-import { useLocalStorageState } from "../../hooks/use-local-storage-state"
 
 function getTodayDate() {
   return new Date().toISOString().split("T")[0]
@@ -33,13 +34,36 @@ function getNextProductId(products: Product[]) {
   return Math.max(...products.map((product) => product.id)) + 1
 }
 
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(value)
+}
+
 export function ProductsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+
   const [products, setProducts] = useLocalStorageState<Product[]>(
-  "forgekit-products",
-  getProducts(),
-)
+    "forgekit-products",
+    getProducts(),
+  )
+
+  const totalProducts = products.length
+
+  const activeProducts = products.filter(
+    (product) => product.status === "Active",
+  ).length
+
+  const lowStockProducts = products.filter(
+    (product) => product.stock > 0 && product.stock <= 10,
+  ).length
+
+  const inventoryValue = products.reduce(
+    (total, product) => total + product.price * product.stock,
+    0,
+  )
 
   function handleCreateProduct(values: ProductFormValues) {
     const newProduct: Product = {
@@ -115,29 +139,61 @@ export function ProductsPage() {
       title="Products"
       description="Reusable products resource page for business apps."
     >
-      <ResourcePage
-        title="Products"
-        description="Manage products, SKUs, categories, prices, stock levels, and statuses."
-        action={
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus className="mr-2 size-4" />
-            Add product
-          </Button>
-        }
-      >
-        <DataTable
-  columns={columns}
-  data={products}
-  searchKey="name"
-  searchPlaceholder="Search products..."
-  emptyTitle="No products found"
-  emptyDescription="No products match your current search."
-  enableExport
-  exportFileName="products"
-  enableColumnVisibility
-  storageKey="products"
-/>
-      </ResourcePage>
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            title="Total Products"
+            value={String(totalProducts)}
+            description="Products in the table"
+            icon={Package}
+          />
+
+          <StatCard
+            title="Active Products"
+            value={String(activeProducts)}
+            description="Currently active items"
+            icon={CircleCheck}
+          />
+
+          <StatCard
+            title="Low Stock"
+            value={String(lowStockProducts)}
+            description="Items at 10 units or less"
+            icon={AlertTriangle}
+          />
+
+          <StatCard
+            title="Inventory Value"
+            value={formatCurrency(inventoryValue)}
+            description="Price multiplied by stock"
+            icon={DollarSign}
+          />
+        </div>
+
+        <ResourcePage
+          title="Products"
+          description="Manage products, SKUs, categories, prices, stock levels, and statuses."
+          action={
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus className="mr-2 size-4" />
+              Add product
+            </Button>
+          }
+        >
+          <DataTable
+            columns={columns}
+            data={products}
+            searchKey="name"
+            searchPlaceholder="Search products..."
+            emptyTitle="No products found"
+            emptyDescription="No products match your current search."
+            enableExport
+            exportFileName="products"
+            enableColumnVisibility
+            storageKey="products"
+          />
+        </ResourcePage>
+      </div>
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-2xl">
