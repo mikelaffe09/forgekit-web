@@ -1,10 +1,19 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Pencil, Plus, Trash2 } from "lucide-react"
+import {
+  Pencil,
+  Plus,
+  ShieldCheck,
+  Trash2,
+  UserCheck,
+  UserPlus,
+  Users,
+} from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
 import { DeleteDialog } from "../../components/shared/delete-dialog"
+import { StatCard } from "../../components/shared/stat-card"
 import { DataTable } from "../../components/tables/data-table"
 import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
@@ -185,6 +194,16 @@ export function UsersPage() {
     defaultUsers,
   )
 
+  const totalUsers = users.length
+
+  const activeUsers = users.filter((user) => user.status === "Active").length
+
+  const invitedUsers = users.filter((user) => user.status === "Invited").length
+
+  const administratorUsers = users.filter(
+    (user) => user.role === "Administrator",
+  ).length
+
   function handleAddUser(values: UserFormValues) {
     const newUser: UserRow = {
       id: getNextUserId(users),
@@ -255,34 +274,66 @@ export function UsersPage() {
       title="Users"
       description="Reusable users page with permission-aware actions."
     >
-      <ResourcePage
-        title="Users"
-        description="Manage users, roles, statuses, and account access."
-        action={
-          <PermissionGate
-            permissions={[AUTH_PERMISSIONS.MANAGE_USERS]}
-            fallback={<Badge variant="secondary">Read-only access</Badge>}
-          >
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
-              <Plus className="mr-2 size-4" />
-              Add user
-            </Button>
-          </PermissionGate>
-        }
-      >
-        <DataTable
-          columns={columns}
-          data={users}
-          searchKey="name"
-          searchPlaceholder="Search users..."
-          emptyTitle="No users found"
-          emptyDescription="No users match your current search."
-          enableExport
-          exportFileName="users"
-          enableColumnVisibility
-          storageKey="users"
-        />
-      </ResourcePage>
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            title="Total Users"
+            value={String(totalUsers)}
+            description="Users in the table"
+            icon={Users}
+          />
+
+          <StatCard
+            title="Active Users"
+            value={String(activeUsers)}
+            description="Currently active accounts"
+            icon={UserCheck}
+          />
+
+          <StatCard
+            title="Invited Users"
+            value={String(invitedUsers)}
+            description="Pending invitations"
+            icon={UserPlus}
+          />
+
+          <StatCard
+            title="Administrators"
+            value={String(administratorUsers)}
+            description="Users with admin role"
+            icon={ShieldCheck}
+          />
+        </div>
+
+        <ResourcePage
+          title="Users"
+          description="Manage users, roles, statuses, and account access."
+          action={
+            <PermissionGate
+              permissions={[AUTH_PERMISSIONS.MANAGE_USERS]}
+              fallback={<Badge variant="secondary">Read-only access</Badge>}
+            >
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="mr-2 size-4" />
+                Add user
+              </Button>
+            </PermissionGate>
+          }
+        >
+          <DataTable
+            columns={columns}
+            data={users}
+            searchKey="name"
+            searchPlaceholder="Search users..."
+            emptyTitle="No users found"
+            emptyDescription="No users match your current search."
+            enableExport
+            exportFileName="users"
+            enableColumnVisibility
+            storageKey="users"
+          />
+        </ResourcePage>
+      </div>
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-2xl">
