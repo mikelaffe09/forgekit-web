@@ -7,7 +7,6 @@ import {
   Users,
 } from "lucide-react"
 
-import { RoleGate } from "../auth/role-gate"
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
 import { StatCard } from "../../components/shared/stat-card"
 import { Badge } from "../../components/ui/badge"
@@ -19,6 +18,8 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card"
+import { AUTH_ROLES } from "../auth/auth-roles"
+import { RoleGate } from "../auth/role-gate"
 
 const reports = [
   {
@@ -85,7 +86,7 @@ export function ReportsPage() {
             </div>
 
             <RoleGate
-              allowedRoles={["Administrator"]}
+              allowedRoles={[AUTH_ROLES.ADMINISTRATOR]}
               fallback={<Badge variant="secondary">Read-only access</Badge>}
             >
               <Button variant="outline">

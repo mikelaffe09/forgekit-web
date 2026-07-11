@@ -1,9 +1,10 @@
 import type { ReactNode } from "react"
 
 import { useAuth } from "./auth-context"
+import type { AuthRole } from "./auth-roles"
 
 type RoleGateProps = {
-  allowedRoles: string[]
+  allowedRoles: AuthRole[]
   children: ReactNode
   fallback?: ReactNode
 }

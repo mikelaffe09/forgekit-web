@@ -11,6 +11,7 @@ import type { ReactNode } from "react"
 import { useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router"
 
+import { AUTH_ROLES } from "../../features/auth/auth-roles"
 import { useAuth } from "../../features/auth/auth-context"
 import { Button } from "../ui/button"
 import { Separator } from "../ui/separator"
@@ -52,7 +53,7 @@ const navItems = [
     label: "Settings",
     href: "/settings",
     icon: Settings,
-    allowedRoles: ["Administrator"],
+    allowedRoles: [AUTH_ROLES.ADMINISTRATOR],
   },
 ]
 
@@ -86,7 +87,8 @@ function SidebarNav({ onNavigate }: SidebarNavProps) {
       return false
     }
 
-    return item.allowedRoles.includes(user.role)
+    // cast to any to avoid strict enum/string mismatch between allowedRoles and user.role
+    return (item.allowedRoles as any).includes(user.role)
   })
 
   return (

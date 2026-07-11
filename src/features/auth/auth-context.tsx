@@ -2,11 +2,13 @@ import { createContext, useContext } from "react"
 import type { ReactNode } from "react"
 
 import { useLocalStorageState } from "../../hooks/use-local-storage-state"
+import { AUTH_ROLES } from "./auth-roles"
+import type { AuthRole } from "./auth-roles"
 
 type AuthUser = {
   name: string
   email: string
-  role: string
+  role: AuthRole
 }
 
 type SignInValues = {
@@ -34,14 +36,14 @@ function getDemoUser(email: string): AuthUser {
     return {
       name: "Demo Staff",
       email,
-      role: "Staff",
+      role: AUTH_ROLES.STAFF,
     }
   }
 
   return {
     name: "Demo Admin",
     email,
-    role: "Administrator",
+    role: AUTH_ROLES.ADMINISTRATOR,
   }
 }
 

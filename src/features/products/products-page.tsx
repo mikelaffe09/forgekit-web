@@ -22,10 +22,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../components/ui/dialog"
-import { RoleGate } from "../auth/role-gate"
-import { useAuth } from "../auth/auth-context"
 import { useLocalStorageState } from "../../hooks/use-local-storage-state"
 import { ResourcePage } from "../../templates/resource-page"
+import { AUTH_ROLES } from "../auth/auth-roles"
+import { useAuth } from "../auth/auth-context"
+import { RoleGate } from "../auth/role-gate"
 
 import { getProductColumns } from "./product-columns"
 import { ProductForm } from "./product-form"
@@ -62,7 +63,7 @@ export function ProductsPage() {
     getProducts(),
   )
 
-  const canManageProducts = user?.role === "Administrator"
+  const canManageProducts = user?.role === AUTH_ROLES.ADMINISTRATOR
 
   const totalProducts = products.length
 
@@ -200,7 +201,7 @@ export function ProductsPage() {
           description="Manage products, SKUs, categories, prices, stock levels, and statuses."
           action={
             <RoleGate
-              allowedRoles={["Administrator"]}
+              allowedRoles={[AUTH_ROLES.ADMINISTRATOR]}
               fallback={<Badge variant="secondary">Read-only access</Badge>}
             >
               <div className="flex flex-wrap gap-2">

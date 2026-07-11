@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router"
 
+import { AUTH_ROLES } from "../features/auth/auth-roles"
 import { ProtectedRoute } from "../features/auth/protected-route"
 import { RoleProtectedRoute } from "../features/auth/role-protected-route"
 import { SignInPage } from "../features/auth/sign-in-page"
@@ -41,7 +42,9 @@ export const router = createBrowserRouter([
         element: <ReportsPage />,
       },
       {
-        element: <RoleProtectedRoute allowedRoles={["Administrator"]} />,
+        element: (
+          <RoleProtectedRoute allowedRoles={[AUTH_ROLES.ADMINISTRATOR]} />
+        ),
         children: [
           {
             path: "/settings",
