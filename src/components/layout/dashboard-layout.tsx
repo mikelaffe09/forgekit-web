@@ -43,7 +43,7 @@ const navItems = [
   },
   {
     label: "Reports",
-    href: "#",
+    href: "/reports",
     icon: BarChart3,
   },
   {

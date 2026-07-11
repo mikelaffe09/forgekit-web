@@ -7,6 +7,7 @@ import { NotFoundPage } from "../features/not-found/not-found-page"
 import { ProductsPage } from "../features/products/products-page"
 import { SettingsPage } from "../features/settings/settings-page"
 import { UsersPage } from "../features/users/users-page"
+import { ReportsPage } from "../features/reports/reports-page"
 
 export const router = createBrowserRouter([
   {
@@ -36,5 +37,9 @@ export const router = createBrowserRouter([
   {
     path: "*",
     element: <NotFoundPage />,
+  },
+  {
+  path: "/reports",
+  element: <ReportsPage />,
   },
 ])
