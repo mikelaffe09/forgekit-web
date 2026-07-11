@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table"
 import {
   Pencil,
   Plus,
+  RotateCcw,
   ShieldCheck,
   Trash2,
   UserCheck,
@@ -12,6 +13,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
+import { ConfirmDialog } from "../../components/shared/confirm-dialog"
 import { DeleteDialog } from "../../components/shared/delete-dialog"
 import { StatCard } from "../../components/shared/stat-card"
 import { DataTable } from "../../components/tables/data-table"
@@ -263,6 +265,14 @@ export function UsersPage() {
     })
   }
 
+  function handleResetUsers() {
+    setUsers(defaultUsers)
+
+    toast.success("Demo users reset", {
+      description: "The users table was restored to the original demo data.",
+    })
+  }
+
   const columns = getUserColumns({
     canManageUsers,
     onEdit: handleEditUser,
@@ -313,10 +323,25 @@ export function UsersPage() {
               permissions={[AUTH_PERMISSIONS.MANAGE_USERS]}
               fallback={<Badge variant="secondary">Read-only access</Badge>}
             >
-              <Button onClick={() => setIsCreateDialogOpen(true)}>
-                <Plus className="mr-2 size-4" />
-                Add user
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <ConfirmDialog
+                  title="Reset demo users?"
+                  description="This will replace the current users table with the original demo users. Your local user changes will be removed."
+                  confirmLabel="Reset users"
+                  onConfirm={handleResetUsers}
+                  trigger={
+                    <Button variant="outline">
+                      <RotateCcw className="mr-2 size-4" />
+                      Reset demo users
+                    </Button>
+                  }
+                />
+
+                <Button onClick={() => setIsCreateDialogOpen(true)}>
+                  <Plus className="mr-2 size-4" />
+                  Add user
+                </Button>
+              </div>
             </PermissionGate>
           }
         >
