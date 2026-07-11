@@ -10,7 +10,14 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ArrowUpDown, Columns3, Download } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Columns3,
+  Download,
+  RotateCcw,
+} from "lucide-react"
 
 import { useLocalStorageState } from "../../hooks/use-local-storage-state"
 import { EmptyState } from "../shared/empty-state"
@@ -43,6 +50,11 @@ type DataTableProps<TData, TValue> = {
 type DataTablePreferences = {
   columnVisibility: VisibilityState
   pageSize: number
+}
+
+const defaultPreferences: DataTablePreferences = {
+  columnVisibility: {},
+  pageSize: 5,
 }
 
 function formatCsvValue(value: unknown) {
@@ -88,11 +100,6 @@ function formatColumnLabel(columnId: string) {
     .replace(/([A-Z])/g, " $1")
     .replace(/[-_]/g, " ")
     .replace(/^./, (char) => char.toUpperCase())
-}
-
-const defaultPreferences: DataTablePreferences = {
-  columnVisibility: {},
-  pageSize: 5,
 }
 
 export function DataTable<TData, TValue>({
@@ -159,6 +166,14 @@ export function DataTable<TData, TValue>({
     }))
   }
 
+  function handleResetView() {
+    setSorting([])
+    table.resetColumnFilters()
+    table.setPageIndex(0)
+    table.setPageSize(defaultPreferences.pageSize)
+    setPreferences(defaultPreferences)
+  }
+
   function handleExport() {
     const filteredRows = table
       .getFilteredRowModel()
@@ -220,6 +235,11 @@ export function DataTable<TData, TValue>({
               </div>
             </details>
           ) : null}
+
+          <Button variant="outline" onClick={handleResetView} disabled={isLoading}>
+            <RotateCcw className="mr-2 size-4" />
+            Reset view
+          </Button>
 
           {enableExport ? (
             <Button
