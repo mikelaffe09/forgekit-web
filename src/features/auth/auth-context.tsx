@@ -1,8 +1,8 @@
 import { createContext, useContext } from "react"
 import type { ReactNode } from "react"
 
+import { DEMO_LOGINS } from "../../config/app-config"
 import { useLocalStorageState } from "../../hooks/use-local-storage-state"
-import { AUTH_ROLES } from "./auth-roles"
 import type { AuthRole } from "./auth-roles"
 
 type AuthUser = {
@@ -32,18 +32,18 @@ type AuthProviderProps = {
 function getDemoUser(email: string): AuthUser {
   const normalizedEmail = email.toLowerCase().trim()
 
-  if (normalizedEmail === "staff@forgekit.dev") {
+  if (normalizedEmail === DEMO_LOGINS.STAFF.email) {
     return {
-      name: "Demo Staff",
+      name: DEMO_LOGINS.STAFF.name,
       email,
-      role: AUTH_ROLES.STAFF,
+      role: DEMO_LOGINS.STAFF.role,
     }
   }
 
   return {
-    name: "Demo Admin",
+    name: DEMO_LOGINS.ADMIN.name,
     email,
-    role: AUTH_ROLES.ADMINISTRATOR,
+    role: DEMO_LOGINS.ADMIN.role,
   }
 }
 
