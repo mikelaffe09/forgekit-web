@@ -52,6 +52,7 @@ const navItems = [
     label: "Settings",
     href: "/settings",
     icon: Settings,
+    allowedRoles: ["Administrator"],
   },
 ]
 
@@ -74,10 +75,23 @@ type SidebarNavProps = {
 
 function SidebarNav({ onNavigate }: SidebarNavProps) {
   const location = useLocation()
+  const { user } = useAuth()
+
+  const visibleNavItems = navItems.filter((item) => {
+    if (!item.allowedRoles) {
+      return true
+    }
+
+    if (!user) {
+      return false
+    }
+
+    return item.allowedRoles.includes(user.role)
+  })
 
   return (
     <nav className="space-y-1">
-      {navItems.map((item) => {
+      {visibleNavItems.map((item) => {
         const isActive = location.pathname === item.href
 
         return (
