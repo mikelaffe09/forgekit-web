@@ -12,6 +12,7 @@ import type { ReactNode } from "react"
 import { useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router"
 
+import { APP_CONFIG } from "../../config/app-config"
 import { AUTH_PERMISSIONS } from "../../features/auth/auth-permissions"
 import type { AuthPermission } from "../../features/auth/auth-permissions"
 import { useAuth } from "../../features/auth/auth-context"
@@ -71,9 +72,9 @@ function SidebarBrand() {
   return (
     <Link to="/" className="block">
       <div className="rounded-lg border bg-card p-4">
-        <p className="text-sm font-semibold">ForgeKit Web</p>
+        <p className="text-sm font-semibold">{APP_CONFIG.name}</p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Reusable starter
+          {APP_CONFIG.tagline}
         </p>
       </div>
     </Link>

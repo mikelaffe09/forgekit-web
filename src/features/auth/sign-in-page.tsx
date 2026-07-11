@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card"
+import { APP_CONFIG, DEMO_LOGINS } from "../../config/app-config"
 
 import { useAuth } from "./auth-context"
 
@@ -47,8 +48,8 @@ export function SignInPage() {
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: "admin@forgekit.dev",
-      password: "password",
+      email: DEMO_LOGINS.ADMIN.email,
+      password: DEMO_LOGINS.ADMIN.password,
     },
   })
 
@@ -56,7 +57,7 @@ export function SignInPage() {
     signIn(values)
 
     toast.success("Signed in", {
-      description: "Welcome back to ForgeKit Web.",
+      description: `Welcome back to ${APP_CONFIG.name}.`,
     })
 
     navigate(redirectPath, {
@@ -74,7 +75,7 @@ export function SignInPage() {
         <div className="mb-6 text-center">
           <Link to="/" className="inline-flex items-center gap-2 font-semibold">
             <ShieldCheck className="size-5" />
-            ForgeKit Web
+            {APP_CONFIG.name}
           </Link>
 
           <p className="mt-2 text-sm text-muted-foreground">
@@ -86,8 +87,8 @@ export function SignInPage() {
           <CardHeader>
             <CardTitle>Sign in</CardTitle>
             <CardDescription>
-              Use the demo credentials or enter any valid email and a password
-              with at least 6 characters.
+              Use one of the demo accounts below or enter any valid email and a
+              password with at least 6 characters.
             </CardDescription>
           </CardHeader>
 
@@ -99,7 +100,7 @@ export function SignInPage() {
               <TextField
                 label="Email"
                 type="email"
-                placeholder="admin@forgekit.dev"
+                placeholder={DEMO_LOGINS.ADMIN.email}
                 error={form.formState.errors.email?.message}
                 {...form.register("email")}
               />
@@ -107,7 +108,7 @@ export function SignInPage() {
               <TextField
                 label="Password"
                 type="password"
-                placeholder="password"
+                placeholder={DEMO_LOGINS.ADMIN.password}
                 error={form.formState.errors.password?.message}
                 {...form.register("password")}
               />
@@ -122,22 +123,22 @@ export function SignInPage() {
             </form>
 
             <div className="mt-6 rounded-lg border bg-muted/50 p-3 text-sm text-muted-foreground">
-  <p className="font-medium text-foreground">Demo logins</p>
+              <p className="font-medium text-foreground">Demo logins</p>
 
-  <div className="mt-3 space-y-3">
-    <div>
-      <p className="font-medium text-foreground">Administrator</p>
-      <p>Email: admin@forgekit.dev</p>
-      <p>Password: password</p>
-    </div>
+              <div className="mt-3 space-y-3">
+                <div>
+                  <p className="font-medium text-foreground">Administrator</p>
+                  <p>Email: {DEMO_LOGINS.ADMIN.email}</p>
+                  <p>Password: {DEMO_LOGINS.ADMIN.password}</p>
+                </div>
 
-    <div>
-      <p className="font-medium text-foreground">Staff</p>
-      <p>Email: staff@forgekit.dev</p>
-      <p>Password: password</p>
-    </div>
-  </div>
-</div>
+                <div>
+                  <p className="font-medium text-foreground">Staff</p>
+                  <p>Email: {DEMO_LOGINS.STAFF.email}</p>
+                  <p>Password: {DEMO_LOGINS.STAFF.password}</p>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
