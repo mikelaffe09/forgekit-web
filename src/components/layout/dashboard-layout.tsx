@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Home,
+  LogOut,
   Menu,
   Package,
   Settings,
@@ -8,8 +9,9 @@ import {
 } from "lucide-react"
 import type { ReactNode } from "react"
 import { useState } from "react"
-import { Link, useLocation } from "react-router"
+import { Link, useLocation, useNavigate } from "react-router"
 
+import { useAuth } from "../../features/auth/auth-context"
 import { Button } from "../ui/button"
 import { Separator } from "../ui/separator"
 import {
@@ -104,7 +106,15 @@ export function DashboardLayout({
   title,
   description,
 }: DashboardLayoutProps) {
+  const navigate = useNavigate()
+  const { user, signOut } = useAuth()
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
+  function handleSignOut() {
+    signOut()
+    setMobileSidebarOpen(false)
+    navigate("/login")
+  }
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -127,6 +137,27 @@ export function DashboardLayout({
           <Separator className="my-4" />
 
           <SidebarNav onNavigate={() => setMobileSidebarOpen(false)} />
+
+          <Separator className="my-4" />
+
+          {user ? (
+            <div className="mb-3 rounded-lg border bg-card p-3">
+              <p className="text-sm font-medium">{user.name}</p>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {user.role}
+              </p>
+            </div>
+          ) : null}
+
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={handleSignOut}
+          >
+            <LogOut className="mr-2 size-4" />
+            Sign out
+          </Button>
         </SheetContent>
       </Sheet>
 
@@ -156,12 +187,19 @@ export function DashboardLayout({
               </div>
             </div>
 
-            <Link
-              to="/"
-              className="hidden h-9 items-center justify-center rounded-md border bg-background px-4 text-sm font-medium shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground sm:inline-flex"
-            >
-              Back home
-            </Link>
+            <div className="hidden items-center gap-3 sm:flex">
+              {user ? (
+                <div className="text-right">
+                  <p className="text-sm font-medium">{user.name}</p>
+                  <p className="text-xs text-muted-foreground">{user.role}</p>
+                </div>
+              ) : null}
+
+              <Button variant="outline" onClick={handleSignOut}>
+                <LogOut className="mr-2 size-4" />
+                Sign out
+              </Button>
+            </div>
           </div>
         </header>
 
