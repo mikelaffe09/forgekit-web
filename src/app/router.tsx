@@ -9,6 +9,7 @@ import { SettingsPage } from "../features/settings/settings-page"
 import { SignInPage } from "../features/auth/sign-in-page"
 import { ProtectedRoute } from "../features/auth/protected-route"
 import { UsersPage } from "../features/users/users-page"
+import { ForbiddenPage } from "../features/errors/forbidden-page"
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +43,14 @@ export const router = createBrowserRouter([
         path: "/settings",
         element: <SettingsPage />,
       },
+      {
+  path: "/403",
+  element: <ForbiddenPage />,
+},
+{
+  path: "*",
+  element: <NotFoundPage />,
+},
     ],
   },
   {
