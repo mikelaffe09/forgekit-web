@@ -7,8 +7,10 @@ import {
   Users,
 } from "lucide-react"
 
+import { RoleGate } from "../auth/role-gate"
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
 import { StatCard } from "../../components/shared/stat-card"
+import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
 import {
   Card,
@@ -82,10 +84,15 @@ export function ReportsPage() {
               </CardDescription>
             </div>
 
-            <Button variant="outline">
-              <Download className="mr-2 size-4" />
-              Export all
-            </Button>
+            <RoleGate
+              allowedRoles={["Administrator"]}
+              fallback={<Badge variant="secondary">Read-only access</Badge>}
+            >
+              <Button variant="outline">
+                <Download className="mr-2 size-4" />
+                Export all
+              </Button>
+            </RoleGate>
           </CardHeader>
 
           <CardContent>
