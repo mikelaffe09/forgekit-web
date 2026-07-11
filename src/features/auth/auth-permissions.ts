@@ -4,6 +4,7 @@ import type { AuthRole } from "./auth-roles"
 export const AUTH_PERMISSIONS = {
   ACCESS_SETTINGS: "access:settings",
   MANAGE_PRODUCTS: "manage:products",
+  MANAGE_USERS: "manage:users",
   EXPORT_REPORTS: "export:reports",
 } as const
 
@@ -14,6 +15,7 @@ const ROLE_PERMISSIONS: Record<AuthRole, AuthPermission[]> = {
   [AUTH_ROLES.ADMINISTRATOR]: [
     AUTH_PERMISSIONS.ACCESS_SETTINGS,
     AUTH_PERMISSIONS.MANAGE_PRODUCTS,
+    AUTH_PERMISSIONS.MANAGE_USERS,
     AUTH_PERMISSIONS.EXPORT_REPORTS,
   ],
   [AUTH_ROLES.STAFF]: [],

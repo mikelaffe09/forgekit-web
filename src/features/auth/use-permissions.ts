@@ -17,6 +17,7 @@ export function usePermissions() {
     hasPermission,
     canAccessSettings: hasPermission(AUTH_PERMISSIONS.ACCESS_SETTINGS),
     canManageProducts: hasPermission(AUTH_PERMISSIONS.MANAGE_PRODUCTS),
+    canManageUsers: hasPermission(AUTH_PERMISSIONS.MANAGE_USERS),
     canExportReports: hasPermission(AUTH_PERMISSIONS.EXPORT_REPORTS),
   }
 }
