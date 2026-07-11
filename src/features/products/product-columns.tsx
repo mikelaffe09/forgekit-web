@@ -8,8 +8,9 @@ import { Button } from "../../components/ui/button"
 import type { Product } from "./product-types"
 
 type ProductColumnsOptions = {
-  onEdit: (product: Product) => void
-  onDelete: (product: Product) => void
+  onEdit?: (product: Product) => void
+  onDelete?: (product: Product) => void
+  canManage?: boolean
 }
 
 function formatCurrency(value: number) {
@@ -19,32 +20,25 @@ function formatCurrency(value: number) {
   }).format(value)
 }
 
-function getStatusVariant(status: Product["status"]) {
-  if (status === "Active") {
-    return "default"
-  }
-
-  if (status === "Draft") {
-    return "secondary"
-  }
-
-  return "outline"
-}
-
 export function getProductColumns({
   onEdit,
   onDelete,
+  canManage = false,
 }: ProductColumnsOptions): ColumnDef<Product>[] {
-  return [
+  const columns: ColumnDef<Product>[] = [
     {
       accessorKey: "name",
       header: "Product",
-      cell: ({ row }) => (
-        <div>
-          <p className="font-medium">{row.original.name}</p>
-          <p className="text-xs text-muted-foreground">{row.original.sku}</p>
-        </div>
-      ),
+      cell: ({ row }) => {
+        const product = row.original
+
+        return (
+          <div>
+            <p className="font-medium">{product.name}</p>
+            <p className="text-xs text-muted-foreground">{product.sku}</p>
+          </div>
+        )
+      },
     },
     {
       accessorKey: "category",
@@ -61,19 +55,15 @@ export function getProductColumns({
       cell: ({ row }) => {
         const stock = row.original.stock
 
-        return (
-          <span
-            className={
-              stock === 0
-                ? "font-medium text-destructive"
-                : stock <= 10
-                  ? "font-medium text-amber-600"
-                  : "font-medium"
-            }
-          >
-            {stock}
-          </span>
-        )
+        if (stock === 0) {
+          return <Badge variant="destructive">Out of stock</Badge>
+        }
+
+        if (stock <= 10) {
+          return <Badge variant="secondary">{stock} left</Badge>
+        }
+
+        return <span>{stock}</span>
       },
     },
     {
@@ -82,34 +72,43 @@ export function getProductColumns({
       cell: ({ row }) => {
         const status = row.original.status
 
-        return <Badge variant={getStatusVariant(status)}>{status}</Badge>
+        return (
+          <Badge variant={status === "Active" ? "default" : "secondary"}>
+            {status}
+          </Badge>
+        )
       },
     },
     {
       accessorKey: "updatedAt",
       header: "Updated",
     },
-    {
+  ]
+
+  if (canManage) {
+    columns.push({
       id: "actions",
+      header: "Actions",
+      enableHiding: false,
       cell: ({ row }) => {
         const product = row.original
 
         return (
-          <div className="flex items-center justify-end gap-1">
+          <div className="flex items-center justify-end gap-2">
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
-              onClick={() => onEdit(product)}
+              onClick={() => onEdit?.(product)}
             >
               <Pencil className="size-4" />
             </Button>
 
             <DeleteDialog
               title="Delete product?"
-              description={`This will permanently delete ${product.name}. This action cannot be undone.`}
-              onConfirm={() => onDelete(product)}
+              description={`This will remove ${product.name} from the products table.`}
+              onConfirm={() => onDelete?.(product)}
               trigger={
-                <Button variant="ghost" size="icon">
+                <Button variant="outline" size="icon">
                   <Trash2 className="size-4" />
                 </Button>
               }
@@ -117,6 +116,8 @@ export function getProductColumns({
           </div>
         )
       },
-    },
-  ]
+    })
+  }
+
+  return columns
 }

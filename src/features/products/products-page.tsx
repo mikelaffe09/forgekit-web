@@ -10,8 +10,10 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
+import { ConfirmDialog } from "../../components/shared/confirm-dialog"
 import { StatCard } from "../../components/shared/stat-card"
 import { DataTable } from "../../components/tables/data-table"
+import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
 import {
   Dialog,
@@ -20,6 +22,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../components/ui/dialog"
+import { RoleGate } from "../auth/role-gate"
+import { useAuth } from "../auth/auth-context"
 import { useLocalStorageState } from "../../hooks/use-local-storage-state"
 import { ResourcePage } from "../../templates/resource-page"
 
@@ -28,7 +32,6 @@ import { ProductForm } from "./product-form"
 import type { ProductFormValues } from "./product-form"
 import { getProducts } from "./product-service"
 import type { Product } from "./product-types"
-import { ConfirmDialog } from "../../components/shared/confirm-dialog"
 
 function getTodayDate() {
   return new Date().toISOString().split("T")[0]
@@ -50,6 +53,7 @@ function formatCurrency(value: number) {
 }
 
 export function ProductsPage() {
+  const { user } = useAuth()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
 
@@ -57,6 +61,8 @@ export function ProductsPage() {
     "forgekit-products",
     getProducts(),
   )
+
+  const canManageProducts = user?.role === "Administrator"
 
   const totalProducts = products.length
 
@@ -150,6 +156,7 @@ export function ProductsPage() {
   const columns = getProductColumns({
     onEdit: handleEditProduct,
     onDelete: handleDeleteProduct,
+    canManage: canManageProducts,
   })
 
   return (
@@ -192,25 +199,30 @@ export function ProductsPage() {
           title="Products"
           description="Manage products, SKUs, categories, prices, stock levels, and statuses."
           action={
-            <div className="flex flex-wrap gap-2">
-              <ConfirmDialog
-  title="Reset demo data?"
-  description="This will replace the current products table with the original demo products. Your local product changes will be removed."
-  confirmLabel="Reset data"
-  onConfirm={handleResetProducts}
-  trigger={
-    <Button variant="outline">
-      <RotateCcw className="mr-2 size-4" />
-      Reset demo data
-    </Button>
-  }
-/>
+            <RoleGate
+              allowedRoles={["Administrator"]}
+              fallback={<Badge variant="secondary">Read-only access</Badge>}
+            >
+              <div className="flex flex-wrap gap-2">
+                <ConfirmDialog
+                  title="Reset demo data?"
+                  description="This will replace the current products table with the original demo products. Your local product changes will be removed."
+                  confirmLabel="Reset data"
+                  onConfirm={handleResetProducts}
+                  trigger={
+                    <Button variant="outline">
+                      <RotateCcw className="mr-2 size-4" />
+                      Reset demo data
+                    </Button>
+                  }
+                />
 
-              <Button onClick={() => setIsCreateDialogOpen(true)}>
-                <Plus className="mr-2 size-4" />
-                Add product
-              </Button>
-            </div>
+                <Button onClick={() => setIsCreateDialogOpen(true)}>
+                  <Plus className="mr-2 size-4" />
+                  Add product
+                </Button>
+              </div>
+            </RoleGate>
           }
         >
           <DataTable
