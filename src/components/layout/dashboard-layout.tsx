@@ -6,13 +6,16 @@ import {
   Package,
   Settings,
   Users,
+  type LucideIcon,
 } from "lucide-react"
 import type { ReactNode } from "react"
 import { useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router"
 
-import { AUTH_ROLES } from "../../features/auth/auth-roles"
+import { AUTH_PERMISSIONS } from "../../features/auth/auth-permissions"
+import type { AuthPermission } from "../../features/auth/auth-permissions"
 import { useAuth } from "../../features/auth/auth-context"
+import { usePermissions } from "../../features/auth/use-permissions"
 import { Button } from "../ui/button"
 import { Separator } from "../ui/separator"
 import {
@@ -28,7 +31,14 @@ type DashboardLayoutProps = {
   description?: string
 }
 
-const navItems = [
+type NavItem = {
+  label: string
+  href: string
+  icon: LucideIcon
+  requiredPermission?: AuthPermission
+}
+
+const navItems: NavItem[] = [
   {
     label: "Dashboard",
     href: "/dashboard",
@@ -53,7 +63,7 @@ const navItems = [
     label: "Settings",
     href: "/settings",
     icon: Settings,
-    allowedRoles: [AUTH_ROLES.ADMINISTRATOR],
+    requiredPermission: AUTH_PERMISSIONS.ACCESS_SETTINGS,
   },
 ]
 
@@ -76,19 +86,14 @@ type SidebarNavProps = {
 
 function SidebarNav({ onNavigate }: SidebarNavProps) {
   const location = useLocation()
-  const { user } = useAuth()
+  const { hasPermission } = usePermissions()
 
   const visibleNavItems = navItems.filter((item) => {
-    if (!item.allowedRoles) {
+    if (!item.requiredPermission) {
       return true
     }
 
-    if (!user) {
-      return false
-    }
-
-    // cast to any to avoid strict enum/string mismatch between allowedRoles and user.role
-    return (item.allowedRoles as any).includes(user.role)
+    return hasPermission(item.requiredPermission)
   })
 
   return (

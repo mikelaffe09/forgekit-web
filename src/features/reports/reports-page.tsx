@@ -18,8 +18,8 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card"
-import { AUTH_ROLES } from "../auth/auth-roles"
-import { RoleGate } from "../auth/role-gate"
+import { AUTH_PERMISSIONS } from "../auth/auth-permissions"
+import { PermissionGate } from "../auth/permission-gate"
 
 const reports = [
   {
@@ -85,15 +85,15 @@ export function ReportsPage() {
               </CardDescription>
             </div>
 
-            <RoleGate
-              allowedRoles={[AUTH_ROLES.ADMINISTRATOR]}
+            <PermissionGate
+              permissions={[AUTH_PERMISSIONS.EXPORT_REPORTS]}
               fallback={<Badge variant="secondary">Read-only access</Badge>}
             >
               <Button variant="outline">
                 <Download className="mr-2 size-4" />
                 Export all
               </Button>
-            </RoleGate>
+            </PermissionGate>
           </CardHeader>
 
           <CardContent>

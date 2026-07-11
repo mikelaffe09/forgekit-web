@@ -24,9 +24,9 @@ import {
 } from "../../components/ui/dialog"
 import { useLocalStorageState } from "../../hooks/use-local-storage-state"
 import { ResourcePage } from "../../templates/resource-page"
-import { AUTH_ROLES } from "../auth/auth-roles"
-import { useAuth } from "../auth/auth-context"
-import { RoleGate } from "../auth/role-gate"
+import { AUTH_PERMISSIONS } from "../auth/auth-permissions"
+import { PermissionGate } from "../auth/permission-gate"
+import { usePermissions } from "../auth/use-permissions"
 
 import { getProductColumns } from "./product-columns"
 import { ProductForm } from "./product-form"
@@ -54,7 +54,7 @@ function formatCurrency(value: number) {
 }
 
 export function ProductsPage() {
-  const { user } = useAuth()
+  const { canManageProducts } = usePermissions()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
 
@@ -62,8 +62,6 @@ export function ProductsPage() {
     "forgekit-products",
     getProducts(),
   )
-
-  const canManageProducts = user?.role === AUTH_ROLES.ADMINISTRATOR
 
   const totalProducts = products.length
 
@@ -200,8 +198,8 @@ export function ProductsPage() {
           title="Products"
           description="Manage products, SKUs, categories, prices, stock levels, and statuses."
           action={
-            <RoleGate
-              allowedRoles={[AUTH_ROLES.ADMINISTRATOR]}
+            <PermissionGate
+              permissions={[AUTH_PERMISSIONS.MANAGE_PRODUCTS]}
               fallback={<Badge variant="secondary">Read-only access</Badge>}
             >
               <div className="flex flex-wrap gap-2">
@@ -223,7 +221,7 @@ export function ProductsPage() {
                   Add product
                 </Button>
               </div>
-            </RoleGate>
+            </PermissionGate>
           }
         >
           <DataTable
