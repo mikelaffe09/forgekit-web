@@ -122,10 +122,22 @@ export function SignInPage() {
             </form>
 
             <div className="mt-6 rounded-lg border bg-muted/50 p-3 text-sm text-muted-foreground">
-              <p className="font-medium text-foreground">Demo login</p>
-              <p className="mt-1">Email: admin@forgekit.dev</p>
-              <p>Password: password</p>
-            </div>
+  <p className="font-medium text-foreground">Demo logins</p>
+
+  <div className="mt-3 space-y-3">
+    <div>
+      <p className="font-medium text-foreground">Administrator</p>
+      <p>Email: admin@forgekit.dev</p>
+      <p>Password: password</p>
+    </div>
+
+    <div>
+      <p className="font-medium text-foreground">Staff</p>
+      <p>Email: staff@forgekit.dev</p>
+      <p>Password: password</p>
+    </div>
+  </div>
+</div>
           </CardContent>
         </Card>
       </div>

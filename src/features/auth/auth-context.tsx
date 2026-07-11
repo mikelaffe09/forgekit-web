@@ -27,6 +27,24 @@ type AuthProviderProps = {
   children: ReactNode
 }
 
+function getDemoUser(email: string): AuthUser {
+  const normalizedEmail = email.toLowerCase().trim()
+
+  if (normalizedEmail === "staff@forgekit.dev") {
+    return {
+      name: "Demo Staff",
+      email,
+      role: "Staff",
+    }
+  }
+
+  return {
+    name: "Demo Admin",
+    email,
+    role: "Administrator",
+  }
+}
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useLocalStorageState<AuthUser | null>(
     "forgekit-auth-user",
@@ -34,11 +52,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   )
 
   function signIn(values: SignInValues) {
-    setUser({
-      name: "Demo Admin",
-      email: values.email,
-      role: "Administrator",
-    })
+    setUser(getDemoUser(values.email))
   }
 
   function signOut() {
