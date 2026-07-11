@@ -1,5 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Plus, Trash2 } from "lucide-react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
@@ -7,11 +8,21 @@ import { DeleteDialog } from "../../components/shared/delete-dialog"
 import { DataTable } from "../../components/tables/data-table"
 import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog"
 import { useLocalStorageState } from "../../hooks/use-local-storage-state"
 import { ResourcePage } from "../../templates/resource-page"
 import { AUTH_PERMISSIONS } from "../auth/auth-permissions"
 import { PermissionGate } from "../auth/permission-gate"
 import { usePermissions } from "../auth/use-permissions"
+
+import { UserForm } from "./user-form"
+import type { UserFormValues } from "./user-form"
 
 type UserStatus = "Active" | "Invited" | "Suspended"
 
@@ -58,6 +69,18 @@ const defaultUsers: UserRow[] = [
     joinedAt: "2026-01-17",
   },
 ]
+
+function getTodayDate() {
+  return new Date().toISOString().split("T")[0]
+}
+
+function getNextUserId(users: UserRow[]) {
+  if (users.length === 0) {
+    return 1
+  }
+
+  return Math.max(...users.map((user) => user.id)) + 1
+}
 
 function getUserColumns({
   canManageUsers,
@@ -144,16 +167,30 @@ function getUserColumns({
 
 export function UsersPage() {
   const { canManageUsers } = usePermissions()
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
   const [users, setUsers] = useLocalStorageState<UserRow[]>(
     "forgekit-users",
     defaultUsers,
   )
 
-  function handleAddUser() {
-    toast.info("Demo action", {
-      description: "Connect this button to a create-user form in a real app.",
+  function handleAddUser(values: UserFormValues) {
+    const newUser: UserRow = {
+      id: getNextUserId(users),
+      name: values.name,
+      email: values.email,
+      role: values.role,
+      status: values.status,
+      joinedAt: getTodayDate(),
+    }
+
+    setUsers((currentUsers) => [newUser, ...currentUsers])
+
+    toast.success("User created", {
+      description: `${values.name} was added to the users table.`,
     })
+
+    setIsCreateDialogOpen(false)
   }
 
   function handleDeleteUser(user: UserRow) {
@@ -174,7 +211,7 @@ export function UsersPage() {
   return (
     <DashboardLayout
       title="Users"
-      description="Reusable users page with role-aware permissions."
+      description="Reusable users page with permission-aware actions."
     >
       <ResourcePage
         title="Users"
@@ -184,7 +221,7 @@ export function UsersPage() {
             permissions={[AUTH_PERMISSIONS.MANAGE_USERS]}
             fallback={<Badge variant="secondary">Read-only access</Badge>}
           >
-            <Button onClick={handleAddUser}>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
               <Plus className="mr-2 size-4" />
               Add user
             </Button>
@@ -204,6 +241,19 @@ export function UsersPage() {
           storageKey="users"
         />
       </ResourcePage>
+
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add user</DialogTitle>
+            <DialogDescription>
+              Create a demo user with a role, status, and account details.
+            </DialogDescription>
+          </DialogHeader>
+
+          <UserForm submitLabel="Create user" onSubmit={handleAddUser} />
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   )
 }
