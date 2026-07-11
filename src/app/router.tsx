@@ -1,8 +1,8 @@
 import { createBrowserRouter } from "react-router"
 
-import { AUTH_ROLES } from "../features/auth/auth-roles"
+import { AUTH_PERMISSIONS } from "../features/auth/auth-permissions"
+import { PermissionProtectedRoute } from "../features/auth/permission-protected-route"
 import { ProtectedRoute } from "../features/auth/protected-route"
-import { RoleProtectedRoute } from "../features/auth/role-protected-route"
 import { SignInPage } from "../features/auth/sign-in-page"
 import { DashboardPage } from "../features/dashboard/dashboard-page"
 import { ForbiddenPage } from "../features/errors/forbidden-page"
@@ -43,7 +43,9 @@ export const router = createBrowserRouter([
       },
       {
         element: (
-          <RoleProtectedRoute allowedRoles={[AUTH_ROLES.ADMINISTRATOR]} />
+          <PermissionProtectedRoute
+            permissions={[AUTH_PERMISSIONS.ACCESS_SETTINGS]}
+          />
         ),
         children: [
           {
