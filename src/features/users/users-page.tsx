@@ -1,10 +1,7 @@
-import type { ColumnDef } from "@tanstack/react-table"
 import {
-  Pencil,
   Plus,
   RotateCcw,
   ShieldCheck,
-  Trash2,
   UserCheck,
   UserPlus,
   Users,
@@ -14,7 +11,6 @@ import { toast } from "sonner"
 
 import { DashboardLayout } from "../../components/layout/dashboard-layout"
 import { ConfirmDialog } from "../../components/shared/confirm-dialog"
-import { DeleteDialog } from "../../components/shared/delete-dialog"
 import { StatCard } from "../../components/shared/stat-card"
 import { DataTable } from "../../components/tables/data-table"
 import { Badge } from "../../components/ui/badge"
@@ -32,54 +28,11 @@ import { AUTH_PERMISSIONS } from "../auth/auth-permissions"
 import { PermissionGate } from "../auth/permission-gate"
 import { usePermissions } from "../auth/use-permissions"
 
+import { getUserColumns } from "./user-columns"
 import { UserForm } from "./user-form"
 import type { UserFormValues } from "./user-form"
-
-type UserStatus = "Active" | "Invited" | "Suspended"
-
-type UserRow = {
-  id: number
-  name: string
-  email: string
-  role: string
-  status: UserStatus
-  joinedAt: string
-}
-
-const defaultUsers: UserRow[] = [
-  {
-    id: 1,
-    name: "Demo Admin",
-    email: "admin@forgekit.dev",
-    role: "Administrator",
-    status: "Active",
-    joinedAt: "2026-01-08",
-  },
-  {
-    id: 2,
-    name: "Demo Staff",
-    email: "staff@forgekit.dev",
-    role: "Staff",
-    status: "Active",
-    joinedAt: "2026-01-10",
-  },
-  {
-    id: 3,
-    name: "Sarah Chen",
-    email: "sarah@example.com",
-    role: "Manager",
-    status: "Invited",
-    joinedAt: "2026-01-14",
-  },
-  {
-    id: 4,
-    name: "Michael Ross",
-    email: "michael@example.com",
-    role: "Staff",
-    status: "Suspended",
-    joinedAt: "2026-01-17",
-  },
-]
+import { getUsers } from "./user-service"
+import type { UserRow } from "./user-types"
 
 function getTodayDate() {
   return new Date().toISOString().split("T")[0]
@@ -93,99 +46,6 @@ function getNextUserId(users: UserRow[]) {
   return Math.max(...users.map((user) => user.id)) + 1
 }
 
-function getUserColumns({
-  canManageUsers,
-  onEdit,
-  onDelete,
-}: {
-  canManageUsers: boolean
-  onEdit: (user: UserRow) => void
-  onDelete: (user: UserRow) => void
-}): ColumnDef<UserRow>[] {
-  const columns: ColumnDef<UserRow>[] = [
-    {
-      accessorKey: "name",
-      header: "User",
-      cell: ({ row }) => {
-        const user = row.original
-
-        return (
-          <div>
-            <p className="font-medium">{user.name}</p>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
-          </div>
-        )
-      },
-    },
-    {
-      accessorKey: "role",
-      header: "Role",
-      cell: ({ row }) => <Badge variant="secondary">{row.original.role}</Badge>,
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.original.status
-
-        return (
-          <Badge
-            variant={
-              status === "Suspended"
-                ? "destructive"
-                : status === "Invited"
-                  ? "secondary"
-                  : "default"
-            }
-          >
-            {status}
-          </Badge>
-        )
-      },
-    },
-    {
-      accessorKey: "joinedAt",
-      header: "Joined",
-    },
-  ]
-
-  if (canManageUsers) {
-    columns.push({
-      id: "actions",
-      header: "Actions",
-      enableHiding: false,
-      cell: ({ row }) => {
-        const user = row.original
-
-        return (
-          <div className="flex items-center justify-end gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => onEdit(user)}
-            >
-              <Pencil className="size-4" />
-            </Button>
-
-            <DeleteDialog
-              title="Delete user?"
-              description={`This will remove ${user.name} from the users table.`}
-              onConfirm={() => onDelete(user)}
-              trigger={
-                <Button variant="outline" size="icon">
-                  <Trash2 className="size-4" />
-                </Button>
-              }
-            />
-          </div>
-        )
-      },
-    })
-  }
-
-  return columns
-}
-
 export function UsersPage() {
   const { canManageUsers } = usePermissions()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -193,7 +53,7 @@ export function UsersPage() {
 
   const [users, setUsers] = useLocalStorageState<UserRow[]>(
     "forgekit-users",
-    defaultUsers,
+    getUsers(),
   )
 
   const totalUsers = users.length
@@ -266,7 +126,7 @@ export function UsersPage() {
   }
 
   function handleResetUsers() {
-    setUsers(defaultUsers)
+    setUsers(getUsers())
 
     toast.success("Demo users reset", {
       description: "The users table was restored to the original demo data.",
