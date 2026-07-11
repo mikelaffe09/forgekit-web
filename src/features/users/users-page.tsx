@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Plus, Trash2 } from "lucide-react"
+import { Pencil, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -84,9 +84,11 @@ function getNextUserId(users: UserRow[]) {
 
 function getUserColumns({
   canManageUsers,
+  onEdit,
   onDelete,
 }: {
   canManageUsers: boolean
+  onEdit: (user: UserRow) => void
   onDelete: (user: UserRow) => void
 }): ColumnDef<UserRow>[] {
   const columns: ColumnDef<UserRow>[] = [
@@ -145,7 +147,15 @@ function getUserColumns({
         const user = row.original
 
         return (
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => onEdit(user)}
+            >
+              <Pencil className="size-4" />
+            </Button>
+
             <DeleteDialog
               title="Delete user?"
               description={`This will remove ${user.name} from the users table.`}
@@ -168,6 +178,7 @@ function getUserColumns({
 export function UsersPage() {
   const { canManageUsers } = usePermissions()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState<UserRow | null>(null)
 
   const [users, setUsers] = useLocalStorageState<UserRow[]>(
     "forgekit-users",
@@ -193,6 +204,36 @@ export function UsersPage() {
     setIsCreateDialogOpen(false)
   }
 
+  function handleEditUser(user: UserRow) {
+    setEditingUser(user)
+  }
+
+  function handleUpdateUser(values: UserFormValues) {
+    if (!editingUser) {
+      return
+    }
+
+    const updatedUser: UserRow = {
+      ...editingUser,
+      name: values.name,
+      email: values.email,
+      role: values.role,
+      status: values.status,
+    }
+
+    setUsers((currentUsers) =>
+      currentUsers.map((user) =>
+        user.id === editingUser.id ? updatedUser : user,
+      ),
+    )
+
+    toast.success("User updated", {
+      description: `${values.name} was updated successfully.`,
+    })
+
+    setEditingUser(null)
+  }
+
   function handleDeleteUser(user: UserRow) {
     setUsers((currentUsers) =>
       currentUsers.filter((currentUser) => currentUser.id !== user.id),
@@ -205,6 +246,7 @@ export function UsersPage() {
 
   const columns = getUserColumns({
     canManageUsers,
+    onEdit: handleEditUser,
     onDelete: handleDeleteUser,
   })
 
@@ -252,6 +294,33 @@ export function UsersPage() {
           </DialogHeader>
 
           <UserForm submitLabel="Create user" onSubmit={handleAddUser} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(editingUser)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingUser(null)
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit user</DialogTitle>
+            <DialogDescription>
+              Update user details, role, and account status.
+            </DialogDescription>
+          </DialogHeader>
+
+          {editingUser ? (
+            <UserForm
+              key={editingUser.id}
+              defaultValues={editingUser}
+              submitLabel="Update user"
+              onSubmit={handleUpdateUser}
+            />
+          ) : null}
         </DialogContent>
       </Dialog>
     </DashboardLayout>
