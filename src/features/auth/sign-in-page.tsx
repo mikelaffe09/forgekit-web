@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ShieldCheck } from "lucide-react"
 import { useForm } from "react-hook-form"
-import { Link, useNavigate } from "react-router"
+import { Link, Navigate, useLocation, useNavigate } from "react-router"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -24,9 +24,25 @@ const signInSchema = z.object({
 
 type SignInFormValues = z.infer<typeof signInSchema>
 
+function getRedirectPath(state: unknown) {
+  if (
+    typeof state === "object" &&
+    state !== null &&
+    "from" in state &&
+    typeof state.from === "string"
+  ) {
+    return state.from
+  }
+
+  return "/dashboard"
+}
+
 export function SignInPage() {
   const navigate = useNavigate()
-  const { signIn } = useAuth()
+  const location = useLocation()
+  const { signIn, isAuthenticated } = useAuth()
+
+  const redirectPath = getRedirectPath(location.state)
 
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
@@ -43,7 +59,13 @@ export function SignInPage() {
       description: "Welcome back to ForgeKit Web.",
     })
 
-    navigate("/dashboard")
+    navigate(redirectPath, {
+      replace: true,
+    })
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
   }
 
   return (
